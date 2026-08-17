@@ -1,0 +1,27 @@
+"on":
+    push:
+        branches:
+            - main
+name: Deploy to hex-preview
+jobs:
+    porter-deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+            - name: Set Github tag
+              id: vars
+              run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+            - name: Setup porter
+              uses: porter-dev/setup-porter@v0.2.0
+            - name: Deploy stack
+              timeout-minutes: 30
+              run: porter apply
+              env:
+                PORTER_APP_NAME: hex-preview
+                PORTER_CLUSTER: "21"
+                PORTER_DEPLOYMENT_TARGET_ID: 515e885f-5c23-4295-899e-c9deb5e63cee
+                PORTER_HOST: https://tyler.dev-porter.run
+                PORTER_PROJECT: "1"
+                PORTER_TAG: ${{ steps.vars.outputs.sha_short }}
+                PORTER_TOKEN: ${{ secrets.PORTER_APP_1_4 }}
